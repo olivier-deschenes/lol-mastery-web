@@ -13,4 +13,6 @@ export type Filters = {
 export const FILTERS_KEY = Symbol() as InjectionKey<{
   summoners: Ref<Filters["summoners"]>;
   championName: Ref<Filters["championName"]>;
+  selectedChampion: Ref<string | null>;
+  handleChampionSelect: (champion: string) => void;
 }>;

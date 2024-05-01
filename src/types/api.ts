@@ -25,6 +25,7 @@ export type Summoner = {
   summonerLevel: number;
   gameName: string;
   tagLine: string;
+  hexColor: string;
 };
 
 export type MasteryResponse = {

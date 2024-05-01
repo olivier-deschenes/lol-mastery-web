@@ -1,19 +1,25 @@
 <template>
   <div class="container flex flex-col gap-10">
     <div class="mt-10">
-      <h1 class="text-3xl font-mono font-bold">Mastery, made easy.</h1>
+      <h1 class="text-3xl font-mono font-bold">
+        Champion<span class="">Mastery</span>.lol
+      </h1>
     </div>
     <div
       class="flex flex-col w-full lg:w-1/2 justify-center items-center mx-auto gap-3"
     >
       <div class="w-full">
-        <Textarea v-model="summonerName" placeholder="Enter summoner names." />
+        <Textarea
+          v-model="summonerName"
+          placeholder="Enter summoner names."
+          class="h-24"
+        />
       </div>
       <div class="ml-auto">
         <Button @click="handleMasteries">Search</Button>
       </div>
     </div>
-    <div v-if="data" class="flex flex-col gap-5">
+    <div v-if="data.length" class="flex flex-col gap-5">
       <div class="flex flex-col gap-1.5">
         <div class="items-center">
           <h2 class="font-mono font-bold">Summoners</h2>
@@ -38,12 +44,30 @@
               <EyeOpenIcon v-if="summonersFilter.includes(summoner.puuid)" />
               <EyeClosedIcon v-else />
             </div>
+            <div>
+              <div
+                class="w-4 h-8 rounded-r-md"
+                :style="{ backgroundColor: `${summoner.hexColor}` }"
+              />
+            </div>
           </div>
         </div>
       </div>
       <div class="flex flex-col gap-1.5">
-        <div class="items-center">
-          <h2 class="font-mono font-bold">Filters</h2>
+        <div class="items-center flex justify-between">
+          <div>
+            <h2 class="font-mono font-bold">Filters</h2>
+          </div>
+          <div>
+            <Button variant="ghost" @click="handleSortChange">
+              <div v-if="sortBy == 'asc'" class="flex items-center">
+                <ArrowDown01 class="w-4 mr-1" /> Ascending
+              </div>
+              <div class="flex items-center" v-else>
+                <ArrowUp10Icon class="w-4 mr-1" /> Descending
+              </div>
+            </Button>
+          </div>
         </div>
         <div>
           <Input
@@ -53,7 +77,9 @@
           />
         </div>
       </div>
-      <div class="grid gap-5 grid-cols-4 mx-auto">
+      <div
+        class="grid gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 grid-rows-12"
+      >
         <Mastery
           v-for="mastery in fileredData"
           :key="mastery.champion.id"
@@ -65,7 +91,6 @@
 </template>
 
 <script setup lang="ts">
-import ky from "ky";
 import { computed, provide, ref } from "vue";
 import Button from "../ui/button/Button.vue";
 import Input from "../ui/input/Input.vue";
@@ -79,9 +104,25 @@ import {
 import { FILTERS_KEY, Filters, MASTERY_KEY } from "./providers";
 import { EyeClosedIcon, EyeOpenIcon } from "@radix-icons/vue";
 import { apiClient } from "../../main";
+import { ArrowDown01, ArrowUp10Icon } from "lucide-vue-next";
 
-const summonerName = ref("OlivierDeschênes#1234\nopaxx#1234");
+const summonerName = ref("OlivierDeschênes#1234\nopaxx#1234\nodeschenes4#1234");
 const championName = ref("");
+const sortBy = ref<"asc" | "desc">("desc");
+
+const selectedChampion = ref<string | null>(null);
+
+const handleChampionClick = (championId: string) => {
+  return;
+
+  selectedChampion.value =
+    selectedChampion.value === championId ? null : championId;
+};
+
+const handleSortChange = () => {
+  console.log("handleSortChange");
+  sortBy.value = sortBy.value === "asc" ? "desc" : "asc";
+};
 
 const data = ref<MasteryResponse[]>([]);
 const summonersFilter = ref<Filters["summoners"]>([]);
@@ -93,6 +134,20 @@ const handleSummonerFilter = (puuid: string) => {
     summonersFilter.value.push(puuid);
   }
 };
+
+function generateBrightColor() {
+  let color = "#";
+  for (let i = 0; i < 3; i++) {
+    color += Math.floor(Math.random() * 256)
+      .toString(16)
+      .padStart(2, "0");
+  }
+  // Ensure brightness by setting the minimum value of the red component to 128
+  if (parseInt(color.substring(1, 3), 16) < 128) {
+    color = "#80" + color.substring(3);
+  }
+  return color;
+}
 
 // Merge all the data into a single array
 const mergedData = computed<MultiSummonerMastery>(() => {
@@ -140,7 +195,9 @@ const mergedData = computed<MultiSummonerMastery>(() => {
   return {
     summoners,
     mastery: Array.from(masteryMap.values()).sort(
-      (a, b) => b.totalChampionPoints - a.totalChampionPoints
+      (a, b) =>
+        (sortBy.value === "asc" ? 1 : -1) *
+        (a.totalChampionPoints - b.totalChampionPoints)
     ),
   };
 });
@@ -149,6 +206,8 @@ provide(MASTERY_KEY, mergedData);
 provide(FILTERS_KEY, {
   summoners: summonersFilter,
   championName: championName,
+  handleChampionSelect: handleChampionClick,
+  selectedChampion: selectedChampion,
 });
 
 const fetchMastery = async (name: string) => {
@@ -159,7 +218,8 @@ const fetchMastery = async (name: string) => {
     },
   });
 
-  const responseData = (await response.json()) as MasteryResponse;
+  let responseData = (await response.json()) as MasteryResponse;
+  responseData.summoner.hexColor = generateBrightColor();
 
   summonersFilter.value.push(responseData.summoner.puuid);
 
