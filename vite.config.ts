@@ -7,15 +7,17 @@ export default ({ mode }: { mode: string }) => {
 
   return defineConfig({
     plugins: [vue()],
-    server: {
+    /* server: {
       proxy: {
         "/api": {
           target: process.env.VITE_API_URL,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ""),
+          rewrite: (path) => {
+            return path.replace(/^\/api/, "");
+          },
         },
       },
-    },
+    }, */
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),

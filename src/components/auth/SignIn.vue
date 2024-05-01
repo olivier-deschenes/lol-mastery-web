@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
-import ky from "ky";
 import { ref } from "vue";
+import { apiClient } from "../../main";
 
 const email = ref("olivierdeschenes9@gmail.com");
 const password = ref("lol12345@");
@@ -12,7 +12,7 @@ type LoginParams = {
 };
 
 const loginIn = ({ email, password }: LoginParams) => {
-  const response = ky.post("/api/auth/sign-in", {
+  const response = apiClient.post("auth/sign-in", {
     json: {
       email,
       password,

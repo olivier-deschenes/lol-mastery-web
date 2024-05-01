@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import SignIn from "./auth/SignIn.vue";
 import MasteryList from "./mastery/MasteryList.vue";
-import ky from "ky";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { User } from "../types/auth";
+import { apiClient } from "../main";
 
 const loginIn = () => {
   console.log("loginIn");
 
-  const response = ky.get("/api/auth/refresh", {
+  const response = apiClient.get("auth/refresh", {
     retry: 0,
   });
   return response.json() as Promise<User>;
 };
 
 const logout = async () => {
-  ky.get("/api/auth/sign-out");
+  apiClient.get("auth/sign-out");
 };
 
 const { data, isPending } = useQuery({

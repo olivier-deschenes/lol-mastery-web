@@ -1,6 +1,11 @@
 import { createApp } from "vue";
 import "./style.css";
 import { VueQueryPlugin } from "@tanstack/vue-query";
-import App from "./App.vue";
+import MasteryList from "./components/mastery/MasteryList.vue";
+import ky from "ky";
 
-createApp(App).use(VueQueryPlugin).mount("#app");
+export const apiClient = ky.create({
+  prefixUrl: import.meta.env.VITE_API_URL,
+});
+
+createApp(MasteryList).use(VueQueryPlugin).mount("#app");

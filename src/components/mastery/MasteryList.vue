@@ -78,6 +78,7 @@ import {
 } from "../../types/api";
 import { FILTERS_KEY, Filters, MASTERY_KEY } from "./providers";
 import { EyeClosedIcon, EyeOpenIcon } from "@radix-icons/vue";
+import { apiClient } from "../../main";
 
 const summonerName = ref("OlivierDeschênes#1234\nopaxx#1234");
 const championName = ref("");
@@ -151,9 +152,7 @@ provide(FILTERS_KEY, {
 });
 
 const fetchMastery = async (name: string) => {
-  const url = `/api/mastery`;
-
-  const response = await ky.get(url, {
+  const response = await apiClient.get(`mastery`, {
     retry: 0,
     searchParams: {
       summonerName: name,
