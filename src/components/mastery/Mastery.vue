@@ -60,7 +60,6 @@ import { computed, inject } from "vue";
 import { MultiMasteryInfo } from "../../types/api";
 import { FILTERS_KEY, MASTERY_KEY } from "./providers";
 import Tooltip from "./Tooltip.vue";
-import { Maximize2 } from "lucide-vue-next";
 
 const { mastery } = defineProps<{
   mastery: MultiMasteryInfo;
